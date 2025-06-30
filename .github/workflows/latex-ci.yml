@@ -13,6 +13,12 @@ jobs:
   generate_pdf:
     runs-on: ubuntu-latest
     
+    # Add permissions for GitHub Pages
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -42,9 +48,13 @@ jobs:
         retention-days: 90
 
     # Option 2: Deploy to GitHub Pages (for direct URL access)
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
+    - name: Setup GitHub Pages
+      uses: actions/configure-pages@v4
+      
+    - name: Upload to GitHub Pages
+      uses: actions/upload-pages-artifact@v3
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./pdfs
-        destination_dir: specs
+        path: pdfs/
+        
+    - name: Deploy to GitHub Pages
+      uses: actions/deploy-pages@v4

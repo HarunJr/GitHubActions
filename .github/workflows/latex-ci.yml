@@ -1,0 +1,45 @@
+name: Generate Technical Spec PDF
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'technical-spec/**' ]
+  # TODO: Change to release trigger later
+  # release:
+  #   types: [published]
+
+jobs:
+  generate_pdf:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Compile LaTeX to PDF
+      uses: xu-cheng/latex-action@v3
+      with:
+        root_file: technical-spec/*.tex
+        working_directory: technical-spec/
+        latexmk_use_lualatex: true
+
+    - name: Organize PDFs
+      run: |
+        mkdir -p pdfs
+        cp technical-spec/*.pdf pdfs/
+
+    # Option 1: Store as GitHub Artifact (for API access)
+    - name: Upload PDF Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: technical-spec-pdfs
+        path: pdfs/
+        retention-days: 90
+
+    # Option 2: Deploy to GitHub Pages (for direct URL access)
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./pdfs
+        destination_dir: specs

@@ -3,9 +3,7 @@ name: Generate Technical Spec PDF
 on:
   push:
     branches: [ main ]
-    paths: 
-      - 'technical-spec/**'
-      - 'midgard.tex'  # Include the main file
+    paths: [ 'technical-spec/**' ]
   workflow_dispatch:  # For manual testing
   # TODO: Change to release trigger later
   # release:
@@ -23,14 +21,14 @@ jobs:
       uses: xu-cheng/latex-action@v3
       with:
         root_file: midgard.tex
-        # No working_directory since midgard.tex is probably in the repo root
+        working_directory: technical-spec/
 
     - name: Organize PDFs
       run: |
         mkdir -p pdfs
-        # Copy the main PDF from root directory
-        if ls *.pdf 1> /dev/null 2>&1; then
-          cp *.pdf pdfs/
+        # Copy the PDF from technical-spec directory
+        if ls technical-spec/*.pdf 1> /dev/null 2>&1; then
+          cp technical-spec/*.pdf pdfs/
         else
           echo "No PDFs found - check if LaTeX compilation succeeded"
         fi

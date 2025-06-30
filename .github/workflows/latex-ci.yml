@@ -4,8 +4,7 @@ on:
   push:
     branches: [ main ]
     paths: [ 'technical-spec/**' ]
-  # Manual trigger for testing
-  workflow_dispatch:
+  workflow_dispatch:  # For manual testing
   # TODO: Change to release trigger later
   # release:
   #   types: [published]
@@ -18,43 +17,20 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Check LaTeX files
-      run: |
-        echo "=== Checking technical-spec directory ==="
-        ls -la technical-spec/
-        echo "=== Looking for .tex files ==="
-        find technical-spec -name "*.tex" -type f
-
     - name: Compile LaTeX to PDF
       uses: xu-cheng/latex-action@v3
       with:
-        # For single main file, use:
         root_file: main.tex
         working_directory: technical-spec/
-        latexmk_use_lualatex: true
-        continue_on_error: true
 
-    - name: Find and organize PDFs
+    - name: Organize PDFs
       run: |
-        echo "=== Checking what files exist ==="
-        ls -la technical-spec/
-        
-        echo "=== Looking for PDF files ==="
-        find . -name "*.pdf" -type f
-        
         mkdir -p pdfs
-        
-        # Find and copy any PDF files that were generated
-        if find technical-spec -name "*.pdf" -type f | head -1 | grep -q .; then
-          echo "=== Found PDFs, copying them ==="
-          find technical-spec -name "*.pdf" -type f -exec cp {} pdfs/ \;
-          echo "=== PDFs copied ==="
-          ls -la pdfs/
+        # Only copy if PDFs exist
+        if ls technical-spec/*.pdf 1> /dev/null 2>&1; then
+          cp technical-spec/*.pdf pdfs/
         else
-          echo "❌ No PDF files found! Check LaTeX compilation."
-          echo "=== LaTeX log files (if any) ==="
-          find technical-spec -name "*.log" -type f -exec echo "--- {} ---" \; -exec cat {} \;
-          exit 1
+          echo "No PDFs found - check if LaTeX compilation succeeded"
         fi
 
     # Option 1: Store as GitHub Artifact (for API access)
